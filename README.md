@@ -428,7 +428,7 @@ A single global split is shared by ADN and CSN:
 The random seed is:
 
 ```text
-20
+35
 ```
 
 The test set is excluded from:
