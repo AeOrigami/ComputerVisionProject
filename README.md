@@ -299,4 +299,510 @@ annotation manifest:
 ```bash
  uv run python Effort_Benchmark/benchmark/deepfakebench_xception.py --annotations benchmark/data/sensifake-hf/metadata/sensifake_all.csv --output benchmark/results/deepfakebench-effort-severity
 ```
+## Sensitivity-Aware Deepfake Detection
+
+The final stage of the project investigates whether content sensitivity can be incorporated into the decision process of a deepfake detector.
+
+The complete experiment is implemented in:
+
+```text
+ProjectSensiFake.ipynb
+```
+
+The method combines two independent neural networks:
+
+- **ADN — Authenticity Detection Network**
+- **CSN — Content Sensitivity Network**
+
+Their probability outputs are combined through a final **Sensitivity-Aware Fusion** policy.
+
+---
+
+## Method Overview
+
+The system follows the architecture:
+
+```text
+                         ┌───────────────────┐
+                         │       ADN         │
+Image ──────────────────►│ Authenticity      │────► P(Real), P(Fake)
+                         │ Detection Network │
+                         └───────────────────┘
+                                   │
+                                   │
+                                   ▼
+                           Sensitivity-Aware
+                                Fusion
+                                   ▲
+                                   │
+                         ┌───────────────────┐
+                         │       CSN         │
+Image ──────────────────►│ Content           │────► P(Low), P(Medium), P(High)
+                         │ Sensitivity Net   │
+                         └───────────────────┘
+```
+
+ADN and CSN are trained independently and receive the same input image.
+
+The fusion is applied only after both models have produced their probability distributions.
+
+---
+
+## Authenticity Detection Network — ADN
+
+ADN performs binary image classification:
+
+```text
+Real / Fake
+```
+
+It uses a pretrained **ResNet-50** backbone adapted to two output classes.
+
+The model produces:
+
+\[
+P(Real),\qquad P(Fake)
+\]
+
+A conventional ADN prediction uses:
+
+\[
+P(Fake)\geq0.5
+\]
+
+as its Fake decision rule.
+
+The training procedure includes:
+
+- pretrained ResNet-50 initialization;
+- progressive fine-tuning;
+- dropout regularization;
+- label smoothing;
+- conservative data augmentation;
+- validation-based checkpoint selection.
+
+The best checkpoint is selected according to **validation Macro F1**.
+
+---
+
+## Content Sensitivity Network — CSN
+
+CSN independently predicts the sensitivity level:
+
+```text
+Low / Medium / High
+```
+
+and produces:
+
+\[
+P(Low),\qquad P(Medium),\qquad P(High)
+\]
+
+CSN is also based on a pretrained **ResNet-50**.
+
+Because High-sensitivity examples are substantially less represented, the training procedure uses class weighting and supervision weighting.
+
+Importantly, the final fusion does not use only the CSN argmax prediction.
+
+Instead, it uses the complete probability distribution:
+
+\[
+P(Low),P(Medium),P(High)
+\]
+
+so that uncertainty between neighboring sensitivity levels is preserved.
+
+---
+
+## Experimental Protocol
+
+A single global split is shared by ADN and CSN:
+
+| Split | Fraction |
+|---|---:|
+| Training | 70% |
+| Validation | 10% |
+| Test | 20% |
+
+The random seed is:
+
+```text
+20
+```
+
+The test set is excluded from:
+
+- model training;
+- checkpoint selection;
+- fusion calibration.
+
+The best ADN and CSN checkpoints are selected using validation performance before final test evaluation.
+
+The models are implemented in **PyTorch**.
+
+---
+
+## Sensitivity-Aware Fusion
+
+The aim of the fusion is not to replace ADN, but to modify its decision boundary according to the predicted sensitivity of each individual image.
+
+A continuous sensitivity or **prudence score** is defined as:
+
+\[
+\rho(x)=
+\frac{1}{3}P(Low)
++
+\frac{2}{3}P(Medium)
++
+P(High)
+\]
+
+The fixed weights
+
+\[
+W_L=\frac13,\qquad
+W_M=\frac23,\qquad
+W_H=1
+\]
+
+encode the ordinal relation:
+
+\[
+Low < Medium < High
+\]
+
+The standard ADN Fake threshold of `0.5` is then modified as:
+
+\[
+\tau_{fake}(x)=0.5-\epsilon\rho(x)
+\]
+
+The final decision is:
+
+\[
+\hat y(x)=
+\begin{cases}
+Fake & P(Fake)\geq\tau_{fake}(x)\\
+Real & P(Fake)<\tau_{fake}(x)
+\end{cases}
+\]
+
+Therefore, higher predicted sensitivity lowers the threshold required to treat an image as Fake.
+
+The result is a more conservative decision policy for sensitive content.
+
+---
+
+## EPSILON Calibration
+
+The sensitivity weights are fixed by design.
+
+Only the global fusion-strength parameter:
+
+\[
+\epsilon
+\]
+
+is calibrated from data.
+
+Calibration is performed **exclusively on validation predictions**.
+
+No test samples or test metrics are used to select EPSILON.
+
+Instead of searching an arbitrary numerical grid, the final calibration computes the exact validation decision breakpoints:
+
+\[
+\epsilon_i=
+\frac{0.5-P(Fake)_i}{\rho_i}
+\]
+
+These are the values at which an individual validation image changes from Real to Fake.
+
+The 450 validation images produced:
+
+- **202 positive decision breakpoints**
+- **203 distinct decision policies**
+
+The final selected value is:
+
+\[
+\boxed{
+\epsilon=0.035769800509300682
+}
+\]
+
+or approximately:
+
+```text
+EPSILON = 0.03577
+```
+
+The selected decision policy remains unchanged throughout:
+
+\[
+\boxed{
+0.0357698
+\leq
+\epsilon
+<
+0.0390868
+}
+\]
+
+Therefore, the validation set supports a stable optimal decision interval rather than a uniquely meaningful decimal value.
+
+The smallest EPSILON producing the selected policy is used.
+
+---
+
+## Sensitivity-Aware Calibration Objective
+
+Because sensitivity is the central element of the fusion, EPSILON is selected using **Sensitivity-Weighted Fake Recall**.
+
+Higher-sensitivity Fake images receive greater importance during validation evaluation.
+
+The selected policy must also satisfy:
+
+\[
+Accuracy_{Fusion}
+\geq
+Accuracy_{ADN}-0.03
+\]
+
+and:
+
+\[
+FakeRecall_{Fusion}
+\geq
+FakeRecall_{ADN}
+\]
+
+Thus, the calibration searches for a more cautious detector while limiting the allowed degradation in standard classification accuracy.
+
+The final calibration implementation is available in:
+
+```text
+tools/calibrate_final_epsilon.py
+```
+
+Additional fusion-analysis scripts are preserved in `tools/` for reproducibility.
+
+---
+
+## ADN Test Results
+
+On the held-out test set, ADN obtains:
+
+| Metric | ADN |
+|---|---:|
+| Accuracy | **81.56%** |
+| Macro F1 | **81.46%** |
+| Fake Precision | **77.52%** |
+| Fake Recall | **88.89%** |
+| Fake F1 | **82.82%** |
+| Fake False Negative Rate | **11.11%** |
+| ROC AUC | **0.905** |
+
+ADN therefore provides a strong Real/Fake baseline before sensitivity information is introduced.
+
+---
+
+## CSN Test Results
+
+Sensitivity classification is more challenging, particularly for the minority High class.
+
+The CSN test confusion matrix gives approximately:
+
+| True sensitivity | Recall |
+|---|---:|
+| Low | **73.5%** |
+| Medium | **89.9%** |
+| High | **46.7%** |
+
+The High class remains the main limitation of CSN.
+
+This also motivates the use of the complete CSN probability distribution in the fusion instead of relying only on the predicted class.
+
+---
+
+## ADN vs Sensitivity-Aware Fusion
+
+The main experimental comparison is between:
+
+1. standard ADN with a fixed threshold of `0.5`;
+2. ADN combined with the sensitivity-aware adaptive threshold.
+
+Final test results are:
+
+| Metric | ADN | Sensitivity-Aware Fusion |
+|---|---:|---:|
+| Accuracy | **81.56%** | **78.56%** |
+| Fake Recall | **88.89%** | **92.22%** |
+| Fake False Negative Rate | **11.11%** | **7.78%** |
+
+Sensitivity-aware fusion therefore increases Fake Recall by approximately:
+
+\[
++3.33\text{ percentage points}
+\]
+
+and reduces the Fake False Negative Rate by approximately:
+
+\[
+-3.33\text{ percentage points}
+\]
+
+while decreasing overall Accuracy by approximately:
+
+\[
+-3.00\text{ percentage points}
+\]
+
+---
+
+## Analysis by Sensitivity
+
+The effect of the fusion is not uniform across sensitivity levels.
+
+Approximate Fake Recall on the test set is:
+
+| True sensitivity | ADN | Fusion |
+|---|---:|---:|
+| Low | 81.6% | **88.8%** |
+| Medium | 91.1% | **93.1%** |
+| High | 97.1% | **97.1%** |
+
+The largest change occurs for Low-sensitivity samples.
+
+This does not mean that higher sensitivity receives less weight.
+
+The sensitivity score determines **how much the decision threshold is shifted**, but a prediction changes only if its ADN Fake probability is sufficiently close to the original decision boundary.
+
+ADN already detects almost all High-sensitivity Fake images, leaving little room for further improvement in that subgroup.
+
+---
+
+## Interpretation
+
+The experiment does **not** show that sensitivity increases the overall classification accuracy of a deepfake detector.
+
+Instead, it shows that sensitivity can be used to modify the detector's **operating policy**.
+
+The resulting detector is more conservative:
+
+- more Fake images are detected;
+- fewer Fake images are incorrectly accepted as Real;
+- more Real images may consequently be flagged as Fake.
+
+The central result of the experiment can therefore be summarized as:
+
+> **Sensitivity does not make the deepfake detector more accurate; it makes the detector more cautious.**
+
+This trade-off can be desirable in applications where missing potentially sensitive synthetic content is considered more costly than producing additional false alarms.
+
+---
+
+## Main Notebook Structure
+
+`ProjectSensiFake.ipynb` follows the project code organization:
+
+```text
+Imports
+Globals
+Utils
+Data
+Network
+Train
+Evaluation
+```
+
+The notebook contains:
+
+1. SensiFake dataset loading;
+2. shared train/validation/test split;
+3. ADN architecture and training;
+4. CSN architecture and training;
+5. best-checkpoint validation;
+6. ADN test evaluation;
+7. CSN test evaluation;
+8. sensitivity-aware fusion;
+9. ADN vs Fusion comparison;
+10. evaluation by true sensitivity;
+11. single-image inference demo.
+
+---
+
+## Reproducibility
+
+Project dependencies are listed in:
+
+```text
+requirements.txt
+```
+
+Install them with:
+
+```bash
+pip install -r requirements.txt
+```
+
+The final model checkpoints are stored in:
+
+```text
+checkpoints/
+├── adn_best.pt
+└── csn_best.pt
+```
+
+Fusion-calibration utilities are stored in:
+
+```text
+tools/
+```
+
+The final validation-only calibration can be run with:
+
+```bash
+python tools/calibrate_final_epsilon.py
+```
+
+---
+
+## Limitations
+
+The main limitations observed in the current experiments are:
+
+- strong imbalance among sensitivity classes;
+- limited representation of High-sensitivity content;
+- lower CSN performance on the High class;
+- a relatively small validation set for fusion calibration;
+- the sensitivity-aware policy improves Fake Recall but introduces additional false positives;
+- the current study is limited to still images.
+
+---
+
+## Future Work
+
+Possible extensions include:
+
+- collecting more human-annotated High-sensitivity samples;
+- improving CSN performance on minority sensitivity classes;
+- calibrating ADN and CSN probability estimates;
+- comparing the adaptive threshold against a globally calibrated ADN threshold;
+- evaluating alternative risk-sensitive objectives;
+- extending the approach to video deepfake detection;
+- developing an interactive application that warns the user when an image is classified as both Fake and highly sensitive.
+
+---
+
+## Conclusion
+
+SensiFake investigates deepfake detection not only as a classification problem, but also as a **risk-aware decision problem**.
+
+ADN provides the underlying authenticity estimate, while CSN adds contextual information about image sensitivity.
+
+The final sensitivity-aware fusion does not improve overall test accuracy. Instead, it changes the operating point of the detector, increasing Fake Recall from **88.89% to 92.22%** and reducing the Fake False Negative Rate from **11.11% to 7.78%**, with a controlled reduction in Accuracy.
+
+The experiments therefore support the use of sensitivity as a mechanism for building a **more cautious deepfake detector**, rather than as a mechanism for maximizing conventional classification accuracy.
 
