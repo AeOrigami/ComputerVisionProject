@@ -1,0 +1,94 @@
+{
+  "total_unique_images": 4499,
+  "human_annotated_images": 1101,
+  "automatic_only_images": 3398,
+  "canonical_human_source_counts": {
+    "original_final_master": 701,
+    "consolidated_final_review": 400,
+    "overlap": 0
+  },
+  "source_distribution": {
+    "ComplexDataLab/OpenFake": 1500,
+    "RRDataset": 1499,
+    "saberzl/SID_Set": 1500
+  },
+  "real_fake_distribution": {
+    "0": 2249,
+    "1": 2250
+  },
+  "final_sensitivity_distribution": {
+    "high": 224,
+    "low": 1267,
+    "medium": 3008
+  },
+  "human_sensitivity_distribution": {
+    "high": 152,
+    "low": 354,
+    "medium": 595
+  },
+  "automatic_only_sensitivity_distribution": {
+    "high": 72,
+    "low": 913,
+    "medium": 2413
+  },
+  "v3_prediction_distribution_all_images": {
+    "high": 210,
+    "low": 1177,
+    "medium": 3112
+  },
+  "source_by_annotation_type": {
+    "ComplexDataLab/OpenFake": {
+      "automatic": 1120,
+      "human": 380
+    },
+    "RRDataset": {
+      "automatic": 1048,
+      "human": 451
+    },
+    "saberzl/SID_Set": {
+      "automatic": 1230,
+      "human": 270
+    }
+  },
+  "source_by_final_sensitivity": {
+    "ComplexDataLab/OpenFake": {
+      "high": 36,
+      "low": 366,
+      "medium": 1098
+    },
+    "RRDataset": {
+      "high": 162,
+      "low": 346,
+      "medium": 991
+    },
+    "saberzl/SID_Set": {
+      "high": 26,
+      "low": 555,
+      "medium": 919
+    }
+  },
+  "real_fake_by_final_sensitivity": {
+    "0": {
+      "high": 53,
+      "low": 642,
+      "medium": 1554
+    },
+    "1": {
+      "high": 171,
+      "low": 625,
+      "medium": 1454
+    }
+  },
+  "v3_supervision_split_distribution": {
+    "frozen_test": 140,
+    "not_used": 3398,
+    "training": 769,
+    "validation": 192
+  },
+  "image_extension_distribution": {
+    ".jpeg": 1,
+    ".jpg": 2359,
+    ".png": 2110,
+    ".webp": 29
+  }
+}

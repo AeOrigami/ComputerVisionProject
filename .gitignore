@@ -1,1 +1,11 @@
-sensifake/
+﻿sensifake/
+Effort_Benchmark/benchmark/data/sensifake-hf/autoannotated/images/
+
+# Large model files (download instead of committing)
+*.pth
+*.safetensors
+*.h5
+*.msgpack
+pytorch_model.bin
+**/huggingface/clip-vit-large-patch14/
+.venv/

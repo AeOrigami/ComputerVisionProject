@@ -1,0 +1,96 @@
+{
+  "audit_result": "PASS",
+  "release": "SensiFake final V3 human-prioritized release",
+  "publication_status": "Technical package complete and audited; explicitly listed attribution/license verification items remain for manual completion before upload.",
+  "created_at_utc": "2026-10-05T16:39:59.022893+00:00",
+  "total_unique_images": 4499,
+  "human_annotated_images": 1101,
+  "automatic_only_images": 3398,
+  "csv_row_counts": {
+    "sensifake_all.csv": 4499,
+    "human_annotated.csv": 1101,
+    "autoannotated_only.csv": 3398
+  },
+  "image_file_counts": {
+    "human_annotated": 1101,
+    "autoannotated": 3398
+  },
+  "checks": {
+    "exactly_4499_unique_content_hashes": true,
+    "no_duplicate_image_id": true,
+    "no_duplicate_image_path": true,
+    "human_automatic_intersection_empty": true,
+    "subset_union_equals_canonical_corpus": true,
+    "all_images_readable": true,
+    "all_metadata_image_paths_resolve": true,
+    "all_sha256_match": true,
+    "source_images_unchanged": true,
+    "valid_real_fake_values": true,
+    "valid_sensitivity_values": true,
+    "all_human_rows_have_authoritative_human_labels": true,
+    "no_automatic_row_has_authoritative_human_label": true,
+    "human_final_labels_take_priority": true,
+    "v3_predictions_and_probabilities_preserved": true,
+    "no_source_identity_omitted": true,
+    "no_source_identity_duplicated": true,
+    "known_rr_duplicate_collapsed": true,
+    "csv_row_counts_match_image_counts": true,
+    "subset_csvs_are_exact_master_views": true,
+    "no_absolute_local_paths": true,
+    "no_hidden_files": true,
+    "no_symlinks": true,
+    "no_checkpoints_notebooks_caches_environments_or_training_logs": true,
+    "historical_artifact_checksums_unchanged": true
+  },
+  "original_physical_file_counts": {
+    "ComplexDataLab/OpenFake": 1500,
+    "saberzl/SID_Set": 1500,
+    "RRDataset": 1500
+  },
+  "original_physical_total": 4500,
+  "known_rrdataset_duplicate": {
+    "sha256": "4b75a9f3a60308515ce3406ef6ff64bb0acb8b9f50f39259bf036aec7ec79994",
+    "source_paths": [
+      "data/datasets/RRDataset/selection_1500/sara/real/real_008773.jpg",
+      "data/datasets/RRDataset/selection_1500/sara/real/real_009566.jpg"
+    ],
+    "release_image_path": "human_annotated/images/4b75a9f3a60308515ce3406ef6ff64bb0acb8b9f50f39259bf036aec7ec79994.jpg",
+    "release_row_count": 1
+  },
+  "input_sha256": {
+    "autoannotator-final version/output/final_dataset/sensifake_autoannotated_v3.csv": "c0e8bf0280005c9d7f9db0af483a6bc0c1b92b46eef41edb697b93aa78ae2cb9",
+    "annotations/master/human_annotations_master_final.csv": "91451a838098fc23bf537d039cd886c52283150f6a3d7f48eb33d91639898b31",
+    "annotations/model_annotation/review_sara.csv": "0fa60f1bed2b4baece196b08b363a96c00180adeb731dff3908058bef1e14013",
+    "data/kaggle/sensitivity_resnet50_final/corpus_manifest.csv": "a73e6ea47f5e5c05141844f8b9f11ef94ba0eddc0a6e59cde604cf5cc6f88bfc",
+    "data/kaggle/human_review_retraining_v2_manifest.csv": "11d8d9ad29367340274c576ef317a60be26df611ac516072dff405ecdfc63cf0",
+    "data/kaggle/sensitivity_resnet50_final/test.csv": "d8abc789e35f5b9e0e18e8d6ac56b00b3d6b0564c439cfa582f9c969c2412417",
+    "autoannotator-final version/output/checkpoints/best_model_ordinal_v3.pt": "48f6495d4a62ded10d98c3835ffcd33c8f5c653e5df19cb03aef62582060e9b4"
+  },
+  "protected_existing_artifact_count": 165,
+  "model_checkpoint_sha256": "48f6495d4a62ded10d98c3835ffcd33c8f5c653e5df19cb03aef62582060e9b4",
+  "public_document_sha256": {
+    "CITATIONS.md": "b489636728f834f8691eb224f9624afad3301eddda25cd81600cfa986b028f31",
+    "DATASET_CARD.md": "b5ab9d3eeaeef9a4daa00bca1c2102f50824c5a75498c8855a5d10677cde4c31",
+    "LICENSE": "ab51e7454479f63da35afbcb782c0b0afe4991ca2626ceff9ca86957aec5d9e3",
+    "README.md": "51ab58b61a00823cc6a77da83a501dec4ecf630f0334aa08f289df17d3d6f122",
+    "metadata/autoannotated_only.csv": "ac8fa0d211e0d87533b3beb05e4ff978c6e1a55eb7ce8c9a1cc743e85a970222",
+    "metadata/dataset_statistics.json": "cd01b0389e0abb4813ec357b6b047af431cf5d5fe6e73925f4ca36eef5824057",
+    "metadata/human_annotated.csv": "e4a3ea8d623951a1e4783b443c66c527c4f88777abe5e67020e4dc58b93bd0ae",
+    "metadata/label_schema.json": "b4a1c7597a67069c02618a1ff4659416e1995cc5a57afa3b42fd54cf2902452c",
+    "metadata/sensifake_all.csv": "f3fa97806f35c7d8d967e26d31b74095ad2b8e276cf2a0c456f58d5c0d0aa6be",
+    "metadata/source_datasets.json": "022cd5ce2a6302b3d1b1a381682e72f2f6eb2ab5885bd6127d462b8acfeb1e62",
+    "model_info/model_card.md": "33a2393fb30ff64eba394bc33a1cf1cc62736e7a993771b461820a737e12f1e6",
+    "model_info/v3_metrics.json": "818ef7037ab525710d89d99c9f55ca5bf8ffabd9df7e744f52d4546561d0390d",
+    "model_info/v3_model_summary.json": "1a44766d5f6e0efeb6074da6b3c01fdddc95e2beb67508d9bd2a40508aeeedd3"
+  },
+  "image_checksum_inventory": "sha256 column in metadata/sensifake_all.csv",
+  "license": "CC-BY-NC-4.0 for SensiFake contributions; source-image terms remain applicable",
+  "manual_review_items": [
+    "RRDataset: independently recheck the CC BY 4.0 dataset license on the official Zenodo record before upload; the record/API was inaccessible during this preparation. The MIT repository license is for code, not dataset imagery.",
+    "RRDataset: complete the official paper author list, formal citation and dataset DOI from the linked publisher/Zenodo records; no bibliographic fields were fabricated.",
+    "SensiFake: add the curator-approved author list, public release URL and DOI if one is assigned; these identifiers are not yet provided.",
+    "Original image attribution: collection manifests do not preserve complete photographer/underlying image-license notices. Verify any additional original-source credit obligations before public redistribution; dataset-level references and source paths are retained."
+  ],
+  "files_created": 4513,
+  "release_size_bytes": 3210866379
+}

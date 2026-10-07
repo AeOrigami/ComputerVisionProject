@@ -1,0 +1,67 @@
+{
+  "release_license": "CC-BY-NC-4.0",
+  "scope": "SensiFake annotations, curation, metadata, deduplication and organization; original image rights remain with original sources.",
+  "sources": [
+    {
+      "id": "ComplexDataLab/OpenFake",
+      "name": "OpenFake",
+      "dataset_url": "https://huggingface.co/datasets/ComplexDataLab/OpenFake",
+      "paper_url": "https://arxiv.org/abs/2509.09495",
+      "dataset_license": "CC-BY-NC-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "license_evidence": "https://huggingface.co/datasets/ComplexDataLab/OpenFake",
+      "attribution": "Credit OpenFake/Complex Data Lab, cite its paper and retain original image notices where applicable.",
+      "selection": {
+        "count": 1500,
+        "requested_revision": "v1.0",
+        "additional_900_resolved_revision": "750279a9710d3d98bbc6d0d87250312cfdf922a0",
+        "pilot_resolved_revision": null
+      },
+      "provenance_limitations": "Upstream sample IDs were not retained; immutable revision is missing for the 600-image pilot."
+    },
+    {
+      "id": "saberzl/SID_Set",
+      "name": "SID-Set",
+      "dataset_url": "https://huggingface.co/datasets/saberzl/SID_Set",
+      "dataset_license": "CC-BY-4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "license_evidence": "https://huggingface.co/datasets/saberzl/SID_Set",
+      "attribution": "Credit SID-Set/SIDA and the paper authors; retain notices required by incorporated image sources.",
+      "paper_title": "SIDA: Social Media Image Deepfake Detection, Localization and Explanation with Large Multimodal Model",
+      "paper_year": 2025,
+      "paper_venue": "CVPR",
+      "selection": {
+        "count": 1500,
+        "resolved_revision": "dc03ead57929879319ce30a82bfcfb8d317b10bd",
+        "native_labels": "0 real; 1 full synthetic; 2 tampered excluded"
+      }
+    },
+    {
+      "id": "RRDataset",
+      "name": "RRDataset",
+      "dataset_url": "https://zenodo.org/records/14963880",
+      "repository_url": "https://github.com/ChunXiaostudy/RRDataset",
+      "paper_url": "https://openaccess.thecvf.com/content/ICCV2025/papers/Li_Bridging_the_Gap_Between_Ideal_and_Real-world_Evaluation_Benchmarking_AI-Generated_ICCV_2025_paper.pdf",
+      "paper_title": "Bridging the Gap Between Ideal and Real-world Evaluation: Benchmarking AI-Generated Image Detection in Challenging Scenarios",
+      "paper_venue": "ICCV 2025",
+      "paper_authors": null,
+      "dataset_doi": null,
+      "dataset_license": "CC-BY-4.0",
+      "dataset_license_verification": "Specified by release owner; official Zenodo record must be independently rechecked before upload.",
+      "code_repository_license": "MIT",
+      "code_license_evidence": "https://github.com/ChunXiaostudy/RRDataset/blob/main/LICENSE",
+      "attribution": "Credit the RRDataset creators and dataset record, cite the benchmark paper, retain original image credit notices; do not apply code MIT terms to the dataset.",
+      "selection": {
+        "physical_files": 1500,
+        "unique_images": 1499
+      },
+      "provenance_limitations": "Authenticity comes from canonical normalized local ai/real source metadata; no independent upstream per-file manifest or immutable upstream revision was preserved."
+    }
+  ],
+  "manual_review_items": [
+    "RRDataset: independently recheck the CC BY 4.0 dataset license on the official Zenodo record before upload; the record/API was inaccessible during this preparation. The MIT repository license is for code, not dataset imagery.",
+    "RRDataset: complete the official paper author list, formal citation and dataset DOI from the linked publisher/Zenodo records; no bibliographic fields were fabricated.",
+    "SensiFake: add the curator-approved author list, public release URL and DOI if one is assigned; these identifiers are not yet provided.",
+    "Original image attribution: collection manifests do not preserve complete photographer/underlying image-license notices. Verify any additional original-source credit obligations before public redistribution; dataset-level references and source paths are retained."
+  ]
+}
