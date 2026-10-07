@@ -1,0 +1,56 @@
+{
+  "ComplexDataLab/OpenFake": {
+    "count": 1500,
+    "real": 750,
+    "fake": 750,
+    "accuracy": 0.7893333333333333,
+    "balanced_accuracy": 0.7893333333333333,
+    "precision_fake": 0.752913752913753,
+    "recall_fake": 0.8613333333333333,
+    "f1_fake": 0.8034825870646766,
+    "roc_auc": 0.8872035555555555,
+    "confusion_matrix": {
+      "tn": 538,
+      "fp": 212,
+      "fn": 104,
+      "tp": 646
+    },
+    "sensitivity_weighted_accuracy": 0.7947565543071161
+  },
+  "RRDataset": {
+    "count": 1499,
+    "real": 749,
+    "fake": 750,
+    "accuracy": 0.6170780520346898,
+    "balanced_accuracy": 0.6168393413440143,
+    "precision_fake": 0.5684292379471229,
+    "recall_fake": 0.9746666666666667,
+    "f1_fake": 0.7180746561886051,
+    "roc_auc": 0.7581593235425012,
+    "confusion_matrix": {
+      "tn": 194,
+      "fp": 555,
+      "fn": 19,
+      "tp": 731
+    },
+    "sensitivity_weighted_accuracy": 0.6520966595593461
+  },
+  "saberzl/SID_Set": {
+    "count": 1500,
+    "real": 750,
+    "fake": 750,
+    "accuracy": 0.7933333333333333,
+    "balanced_accuracy": 0.7933333333333333,
+    "precision_fake": 0.7111324376199616,
+    "recall_fake": 0.988,
+    "f1_fake": 0.8270089285714286,
+    "roc_auc": 0.9170666666666667,
+    "confusion_matrix": {
+      "tn": 449,
+      "fp": 301,
+      "fn": 9,
+      "tp": 741
+    },
+    "sensitivity_weighted_accuracy": 0.7964386887899636
+  }
+}

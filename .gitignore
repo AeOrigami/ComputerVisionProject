@@ -1,5 +1,5 @@
 ﻿sensifake/
-Effort_Benchmark/benchmark/data/sensifake-hf/autoannotated/images/
+Effort_Benchmark/benchmark/data/sensifake-hf/
 
 # Large model files (download instead of committing)
 *.pth

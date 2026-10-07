@@ -1,0 +1,18 @@
+{
+  "count": 3008,
+  "real": 1554,
+  "fake": 1454,
+  "accuracy": 0.7433510638297872,
+  "balanced_accuracy": 0.7499712327772851,
+  "precision_fake": 0.6641000962463908,
+  "recall_fake": 0.9491059147180193,
+  "f1_fake": 0.7814269535673839,
+  "roc_auc": 0.8703691410018782,
+  "confusion_matrix": {
+    "tn": 856,
+    "fp": 698,
+    "fn": 74,
+    "tp": 1380
+  },
+  "sensitivity_weighted_accuracy": 0.7433510638297872
+}

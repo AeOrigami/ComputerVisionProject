@@ -1,4 +1,4 @@
-"""Evaluate annotated SensiFake images with DeepfakeBench's Effort detector.
+"""Evaluate annotated SensiFake images with severity-specific thresholds.
 
 The script imports DeepfakeBench instead of copying its model code. It keeps the
 SensiFake manifest as the source of truth for image paths, labels, and sensitivity.
@@ -19,6 +19,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 LEVELS = ("low", "medium", "high")
 SENSITIVITY_WEIGHTS = {"low": 1.0, "medium": 2.0, "high": 3.0}
+SENSITIVITY_THRESHOLDS = {"low": 0.5, "medium": 0.4, "high": 0.3}
 DEFAULT_ANNOTATIONS = ROOT / "benchmark/data/sensifake-hf/metadata/sensifake_all.csv"
 DEFAULT_DEEPFAKEBENCH = ROOT / "DeepfakeBench"
 DEFAULT_DETECTOR_CONFIG = DEFAULT_DEEPFAKEBENCH / "training/config/detector/effort.yaml"
@@ -167,16 +168,28 @@ def grouped_metrics(
         group: binary_metrics(
             [row["label"] for row in group_rows],
             [row["probability_fake"] for row in group_rows],
+            [SENSITIVITY_THRESHOLDS[row["sensitivity_level"]] for row in group_rows],
         )
         for group, group_rows in sorted(groups.items())
     }
 
 
-def binary_metrics(labels: list[int], probabilities: list[float]) -> dict[str, Any]:
+def binary_metrics(
+    labels: list[int], probabilities: list[float], thresholds: list[float]
+) -> dict[str, Any]:
     """Compute metrics without requiring scikit-learn in the host project."""
-    if len(labels) != len(probabilities) or not labels:
-        raise ValueError("labels and probabilities must be non-empty and equally sized")
-    predicted = [int(probability >= 0.5) for probability in probabilities]
+    if (
+        len(labels) != len(probabilities)
+        or len(labels) != len(thresholds)
+        or not labels
+    ):
+        raise ValueError(
+            "labels, probabilities, and thresholds must be non-empty and equally sized"
+        )
+    predicted = [
+        int(probability >= threshold)
+        for probability, threshold in zip(probabilities, thresholds)
+    ]
     tn = sum(label == 0 and prediction == 0 for label, prediction in zip(labels, predicted))
     fp = sum(label == 0 and prediction == 1 for label, prediction in zip(labels, predicted))
     fn = sum(label == 1 and prediction == 0 for label, prediction in zip(labels, predicted))
@@ -223,7 +236,11 @@ def sensitivity_weighted_accuracy(rows: list[dict[str, Any]]) -> float:
             ) from error
         total_weight += weight
         correct_weight += weight * (
-            int(row["probability_fake"] >= 0.5) == row["label"]
+            int(
+                row["probability_fake"]
+                >= SENSITIVITY_THRESHOLDS[row["sensitivity_level"]]
+            )
+            == row["label"]
         )
     return correct_weight / total_weight
 
@@ -387,6 +404,7 @@ def write_group_results(
         group: binary_metrics(
             [row["label"] for row in rows],
             [row["probability_fake"] for row in rows],
+            [SENSITIVITY_THRESHOLDS[row["sensitivity_level"]] for row in rows],
         )
         for group, rows in sorted(grouped_rows.items())
     }
@@ -551,11 +569,14 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
             output = model({"image": tensor, "label": torch.zeros(len(images), dtype=torch.long, device=device)}, inference=True)
             probabilities = output["prob"].detach().cpu().tolist()
             for row, probability in zip(batch_rows, probabilities):
+                threshold = SENSITIVITY_THRESHOLDS[row["sensitivity_level"]]
                 predictions.append({"content_hash": row["content_hash"], "image_path": row["image_path"],
                                     "source_dataset": dataset_name(row),
                                     "sensitivity_level": row["sensitivity_level"],
                                     "label": int(row["normalized_label"] == "fake"),
-                                    "probability_fake": probability})
+                                    "probability_fake": probability,
+                                    "classification_threshold": threshold,
+                                    "predicted_label": int(probability >= threshold)})
 
     args.output.mkdir(parents=True, exist_ok=True)
     write_csv(args.output / "predictions.csv", predictions)
@@ -566,14 +587,20 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         "all": binary_metrics(
             [r["label"] for r in predictions],
             [r["probability_fake"] for r in predictions],
+            [r["classification_threshold"] for r in predictions],
         )
     }
+    metrics["classification_thresholds"] = dict(SENSITIVITY_THRESHOLDS)
     metrics["all"]["sensitivity_weighted_accuracy"] = sensitivity_weighted_accuracy(predictions)
     for level in LEVELS:
         level_rows = [row for row in predictions if row["sensitivity_level"] == level]
         if not level_rows:
             raise ValueError(f"No annotated images in sensitivity level {level}")
-        metrics[level] = binary_metrics([r["label"] for r in level_rows], [r["probability_fake"] for r in level_rows])
+        metrics[level] = binary_metrics(
+            [r["label"] for r in level_rows],
+            [r["probability_fake"] for r in level_rows],
+            [r["classification_threshold"] for r in level_rows],
+        )
         metrics[level]["sensitivity_weighted_accuracy"] = sensitivity_weighted_accuracy(level_rows)
         write_csv(args.output / level / "predictions.csv", level_rows)
         (args.output / level / "metrics.json").write_text(json.dumps(metrics[level], indent=2) + "\n", encoding="utf-8")
@@ -601,6 +628,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         key: binary_metrics(
             [row["label"] for row in rows],
             [row["probability_fake"] for row in rows],
+            [row["classification_threshold"] for row in rows],
         )
         for key, rows in sorted(dataset_level_rows.items())
     }
