@@ -1,3 +1,172 @@
+# SensiFake
+
+**Computer Vision Project — A.Y. 2025/2026**  
+Sapienza University of Rome
+
+SensiFake is a sensitivity-aware deepfake detection project built around two complementary objectives:
+
+1. constructing a curated image dataset containing both **authenticity labels** (`Real` / `Fake`) and **content-sensitivity labels** (`Low` / `Medium` / `High`);
+2. investigating whether sensitivity information can be used to make a deepfake detector more cautious when classification errors may be more consequential.
+
+The project therefore covers the complete pipeline from dataset construction and sensitivity annotation to deep-learning models, external benchmarking, and a final sensitivity-aware decision policy.
+
+---
+
+## Dataset Construction
+
+The SensiFake dataset combines images from three existing deepfake datasets:
+
+| Source dataset | Selected images |
+|---|---:|
+| OpenFake | 1,500 |
+| SID-Set | 1,500 |
+| RRDataset | 1,500 source files |
+
+The initial selection contained **4,500 source files**.
+
+A SHA-256 audit detected one pair of byte-identical images in RRDataset, resulting in:
+
+**4,499 unique images**
+
+The final authenticity distribution is almost perfectly balanced:
+
+| Authenticity | Images |
+|---|---:|
+| Real | 2,249 |
+| Fake | 2,250 |
+
+Authenticity labels are inherited from the original source datasets and are kept independent from the sensitivity-annotation process.
+
+---
+
+## Sensitivity Labels
+
+Each image is associated with one of three content-sensitivity levels:
+
+- **Low**
+- **Medium**
+- **High**
+
+The final distribution is:
+
+| Sensitivity | Images |
+|---|---:|
+| Low | 1,267 |
+| Medium | 3,008 |
+| High | 224 |
+
+The strong imbalance, especially for the High class, is an important characteristic of the dataset and later affects the sensitivity-classification task.
+
+---
+
+## Sensitivity Annotation Pipeline
+
+Sensitivity labels were produced through a combination of **human annotation** and **automatic annotation**.
+
+The final dataset contains:
+
+| Annotation source | Images |
+|---|---:|
+| Human annotated | 1,101 |
+| Automatic-only | 3,398 |
+| **Total** | **4,499** |
+
+Human annotations were collected and reviewed using a dedicated annotation workflow.
+
+The repository contains a Streamlit-based annotation tool supporting:
+
+- image batch import;
+- sensitivity annotation;
+- annotation review;
+- asynchronous work by multiple annotators;
+- package management;
+- annotation export;
+- integration of reviewed labels into the dataset.
+
+The annotation application and supporting modules are located in:
+
+```text
+SensiFake-Dataset_Creation/script_manual_annotator/
+```
+
+The sensitivity-model and dataset-processing code is located in:
+
+```text
+SensiFake-Dataset_Creation/script/
+```
+
+---
+
+## Dataset Processing
+
+The dataset-construction workflow can be summarized as:
+
+```text
+Source datasets
+      │
+      ▼
+Image selection
+      │
+      ▼
+Authenticity-label verification
+      │
+      ▼
+SHA-256 audit and deduplication
+      │
+      ▼
+Human sensitivity annotation
+      │
+      ▼
+Sensitivity-model development
+      │
+      ▼
+Automatic annotation of remaining images
+      │
+      ▼
+Human review / consolidation
+      │
+      ▼
+Unified SensiFake metadata
+```
+
+The resulting metadata preserve, when available:
+
+- image identifier;
+- image path;
+- source dataset;
+- Real/Fake label;
+- Low/Medium/High sensitivity label;
+- annotation provenance;
+- SHA-256 information.
+
+---
+
+## Repository Structure — Dataset Components
+
+```text
+SensiFake-Dataset_Creation/
+│
+├── script/
+│   ├── sensitivity_ordinal_v3.ipynb
+│   ├── sensitivity_v2_booster.py
+│   └── build_human_review_retraining_v2_manifest.py
+│
+├── script_manual_annotator/
+│   ├── app.py
+│   ├── annotation_database.py
+│   ├── annotation_packages.py
+│   ├── annotation_schema.py
+│   ├── build_model_review_batches.py
+│   ├── import_batches.py
+│   └── ...
+│
+└── plots/
+    └── sensitivity-model and dataset analyses
+```
+
+The published dataset, download instructions, provenance information, and external benchmark are described in the following section.
+
+
 # DeepfakeBench Effort benchmark
 
 `deepfakebench_xception.py` evaluates SensiFake images with DeepfakeBench's
